@@ -21,7 +21,7 @@ LunkerzeroDevelopment(
     )
 )
 
-LunkerzeroStack(
+LunkerzeroGuineapigs(
     app, 'LunkerzeroGuineapigs',
     env = cdk.Environment(
         account = os.getenv('CDK_DEFAULT_ACCOUNT'),
@@ -32,7 +32,7 @@ LunkerzeroStack(
     )
 )
 
-LunkerzeroStack(
+LunkerzeroProduction(
     app, 'LunkerzeroProduction',
     env = cdk.Environment(
         account = os.getenv('CDK_DEFAULT_ACCOUNT'),
