@@ -67,59 +67,75 @@ class LunkerzeroStack(Stack):
         cwlperm = _iam.PolicyStatement(
             effect = _iam.Effect.ALLOW,
             actions=[
-                "application-autoscaling:DescribeScalingPolicies",
-                "application-signals:BatchGet*",
-                "application-signals:Get*",
-                "application-signals:List*",
-                "autoscaling:Describe*",
-                "cloudwatch:BatchGet*",
-                "cloudwatch:Describe*",
-                "cloudwatch:GenerateQuery",
-                "cloudwatch:Get*",
-                "cloudwatch:List*",
-                "logs:Get*",
-                "logs:List*",
-                "logs:StartQuery",
-                "logs:StopQuery",
-                "logs:Describe*",
-                "logs:TestMetricFilter",
-                "logs:FilterLogEvents",
-                "logs:StartLiveTail",
-                "logs:StopLiveTail",
-                "oam:ListSinks",
-                "sns:Get*",
-                "sns:List*",
-                "rum:BatchGet*",
-                "rum:Get*",
-                "rum:List*",
-                "synthetics:Describe*",
-                "synthetics:Get*",
-                "synthetics:List*",
-                "xray:BatchGet*",
-                "xray:Get*"
+                'application-autoscaling:DescribeScalingPolicies',
+                'application-signals:BatchGet*',
+                'application-signals:Get*',
+                'application-signals:List*',
+                'autoscaling:Describe*',
+                'cloudwatch:BatchGet*',
+                'cloudwatch:Describe*',
+                'cloudwatch:GenerateQuery',
+                'cloudwatch:Get*',
+                'cloudwatch:List*',
+                'logs:Get*',
+                'logs:List*',
+                'logs:StartQuery',
+                'logs:StopQuery',
+                'logs:Describe*',
+                'logs:TestMetricFilter',
+                'logs:FilterLogEvents',
+                'logs:StartLiveTail',
+                'logs:StopLiveTail',
+                'oam:ListSinks',
+                'sns:Get*',
+                'sns:List*',
+                'rum:BatchGet*',
+                'rum:Get*',
+                'rum:List*',
+                'synthetics:Describe*',
+                'synthetics:Get*',
+                'synthetics:List*',
+                'xray:BatchGet*',
+                'xray:Get*'
             ],
             resources = [
-                "*"
-            ]
-        )
-
-        oamperm = _iam.PolicyStatement(
-            effect = _iam.Effect.ALLOW,
-            actions=[
-                "oam:ListAttachedLinks"
-            ],
-            resources = [
-                "arn:aws:oam:*:*:sink/*"
+                '*'
             ]
         )
 
         iamperm = _iam.PolicyStatement(
             effect = _iam.Effect.ALLOW,
             actions=[
-                "iam:GetRole"
+                'iam:GetRole'
             ],
             resources = [
-                "arn:aws:iam::*:role/aws-service-role/application-signals.cloudwatch.amazonaws.com/AWSServiceRoleForCloudWatchApplicationSignals"
+                'arn:aws:iam::*:role/aws-service-role/application-signals.cloudwatch.amazonaws.com/AWSServiceRoleForCloudWatchApplicationSignals'
+            ]
+        )
+
+        lambdaperm = _iam.PolicyStatement(
+            effect = _iam.Effect.ALLOW,
+            actions=[
+                'lambda:InvokeFunction'
+            ],
+            resources = [
+                'arn:aws:lambda:'+region+':'+account+':function:walleye',
+                'arn:aws:lambda:'+region+':'+account+':function:bass',
+                'arn:aws:lambda:'+region+':'+account+':function:perch',
+                'arn:aws:lambda:'+region+':'+account+':function:pike',
+                'arn:aws:lambda:'+region+':'+account+':function:crappie',
+                'arn:aws:lambda:'+region+':'+account+':function:minnow',
+                'arn:aws:lambda:'+region+':'+account+':function:northern'
+            ]
+        )
+
+        oamperm = _iam.PolicyStatement(
+            effect = _iam.Effect.ALLOW,
+            actions=[
+                'oam:ListAttachedLinks'
+            ],
+            resources = [
+                'arn:aws:oam:*:*:sink/*'
             ]
         )
 
@@ -180,8 +196,6 @@ class LunkerzeroStack(Stack):
         )
 
         slacklunkerzero.add_to_role_policy(cwlperm)
-        slacklunkerzero.add_to_role_policy(oamperm)
-        slacklunkerzero.add_to_role_policy(iamperm)
 
         topiclunkerzero = _sns.Topic(
             self, 'topiclunkerzero',
@@ -205,9 +219,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelwalleye.string_value
         )
 
-        slackwalleye.add_to_role_policy(cwlperm)
         slackwalleye.add_to_role_policy(oamperm)
         slackwalleye.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topicwalleye = _sns.Topic(
             self, 'topicwalleye',
@@ -231,9 +245,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelbass.string_value
         )
 
-        slackbass.add_to_role_policy(cwlperm)
         slackbass.add_to_role_policy(oamperm)
         slackbass.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topicbass = _sns.Topic(
             self, 'topicbass',
@@ -257,9 +271,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelperch.string_value
         )
 
-        slackperch.add_to_role_policy(cwlperm)
         slackperch.add_to_role_policy(oamperm)
         slackperch.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topicperch = _sns.Topic(
             self, 'topicperch',
@@ -283,9 +297,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelpike.string_value
         )
 
-        slackpike.add_to_role_policy(cwlperm)
         slackpike.add_to_role_policy(oamperm)
         slackpike.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topicpike = _sns.Topic(
             self, 'topicpike',
@@ -309,9 +323,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelcrappie.string_value
         )
 
-        slackcrappie.add_to_role_policy(cwlperm)
         slackcrappie.add_to_role_policy(oamperm)
         slackcrappie.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topiccrappie = _sns.Topic(
             self, 'topiccrappie',
@@ -335,9 +349,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelminnow.string_value
         )
 
-        slackminnow.add_to_role_policy(cwlperm)
         slackminnow.add_to_role_policy(oamperm)
         slackminnow.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topicminnow = _sns.Topic(
             self, 'topicminnow',
@@ -361,9 +375,9 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelnorthern.string_value
         )
 
-        slacknorthern.add_to_role_policy(cwlperm)
         slacknorthern.add_to_role_policy(oamperm)
         slacknorthern.add_to_role_policy(iamperm)
+        slackwalleye.add_to_role_policy(lambdaperm)
 
         topicnorthern = _sns.Topic(
             self, 'topicnorthern',
