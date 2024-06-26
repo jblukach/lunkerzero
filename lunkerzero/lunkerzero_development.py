@@ -88,6 +88,7 @@ class LunkerzeroDevelopment(Stack):
 
             table = _dynamodb.Table(
                 self, 'table'+fish,
+                table_name = fish,
                 partition_key = {
                     'name': 'pk',
                     'type': _dynamodb.AttributeType.STRING
@@ -98,7 +99,6 @@ class LunkerzeroDevelopment(Stack):
                 },
                 billing_mode = _dynamodb.BillingMode.PAY_PER_REQUEST,
                 removal_policy = RemovalPolicy.DESTROY,
-                time_to_live_attribute = 'ttl',
                 point_in_time_recovery = True,
                 deletion_protection = True
             )
