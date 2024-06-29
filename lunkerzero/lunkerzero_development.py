@@ -79,6 +79,13 @@ class LunkerzeroDevelopment(Stack):
             )
         )
 
+    ### PARAMETERS ###
+
+        tld = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'tld',
+            parameter_name = '/lunkerzero/tldtable'
+        )
+
      ### LUNKER ###
 
         fishes = []
@@ -116,6 +123,7 @@ class LunkerzeroDevelopment(Stack):
                     CENSYS_API_ID = '-',
                     CENSYS_API_SECRET = '-',
                     DYNAMODB_TABLE = table.table_name,
+                    DYNAMODB_TLDTABLE = tld.string_value,
                     LUNKER_FISH = fish,
                     LUNKER_LIMIT = '10'
                 ),

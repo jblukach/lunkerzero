@@ -67,6 +67,16 @@ class LunkerzeroVerification(Stack):
             deletion_protection = True
         )
 
+    ### PARAMETER ###
+
+        parameter = _ssm.StringParameter(
+            self, 'parameter',
+            description = 'Top Level Domain (TLD) Table',
+            parameter_name = '/lunkerzero/tldtable',
+            string_value = table.table_name,
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
     ### IAM ###
 
         role = _iam.Role(

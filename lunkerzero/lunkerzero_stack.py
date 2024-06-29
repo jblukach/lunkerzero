@@ -204,6 +204,8 @@ class LunkerzeroStack(Stack):
         )
 
         slacklunkerzero.add_notification_topic(topiclunkerzero)
+        slacklunkerzero.add_to_role_policy(oamperm)
+        slacklunkerzero.add_to_role_policy(iamperm)
 
         slacklunkerzero.apply_removal_policy(
             RemovalPolicy.DESTROY    
@@ -219,8 +221,6 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelwalleye.string_value
         )
 
-        slackwalleye.add_to_role_policy(oamperm)
-        slackwalleye.add_to_role_policy(iamperm)
         slackwalleye.add_to_role_policy(lambdaperm)
 
         topicwalleye = _sns.Topic(
@@ -245,9 +245,7 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelbass.string_value
         )
 
-        slackbass.add_to_role_policy(oamperm)
-        slackbass.add_to_role_policy(iamperm)
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slackbass.add_to_role_policy(lambdaperm)
 
         topicbass = _sns.Topic(
             self, 'topicbass',
@@ -271,9 +269,7 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelperch.string_value
         )
 
-        slackperch.add_to_role_policy(oamperm)
-        slackperch.add_to_role_policy(iamperm)
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slackperch.add_to_role_policy(lambdaperm)
 
         topicperch = _sns.Topic(
             self, 'topicperch',
@@ -297,9 +293,7 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelpike.string_value
         )
 
-        slackpike.add_to_role_policy(oamperm)
-        slackpike.add_to_role_policy(iamperm)
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slackpike.add_to_role_policy(lambdaperm)
 
         topicpike = _sns.Topic(
             self, 'topicpike',
@@ -323,9 +317,7 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelcrappie.string_value
         )
 
-        slackcrappie.add_to_role_policy(oamperm)
-        slackcrappie.add_to_role_policy(iamperm)
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slackcrappie.add_to_role_policy(lambdaperm)
 
         topiccrappie = _sns.Topic(
             self, 'topiccrappie',
@@ -349,9 +341,7 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelminnow.string_value
         )
 
-        slackminnow.add_to_role_policy(oamperm)
-        slackminnow.add_to_role_policy(iamperm)
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slackminnow.add_to_role_policy(lambdaperm)
 
         topicminnow = _sns.Topic(
             self, 'topicminnow',
@@ -375,9 +365,7 @@ class LunkerzeroStack(Stack):
             slack_channel_id = channelnorthern.string_value
         )
 
-        slacknorthern.add_to_role_policy(oamperm)
-        slacknorthern.add_to_role_policy(iamperm)
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slacknorthern.add_to_role_policy(lambdaperm)
 
         topicnorthern = _sns.Topic(
             self, 'topicnorthern',
