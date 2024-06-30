@@ -55,10 +55,6 @@ def handler(event, context):
     code = 200
     msg = 'Hello from Lunker!'
 
-
-
-
-
     return {
         'statusCode': code,
         'body': json.dumps(msg)

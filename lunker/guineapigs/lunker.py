@@ -173,6 +173,57 @@ def handler(event, context):
                         table.delete_item(Key={'pk': 'AS#', 'sk': 'AS#IPV'+str(iptype.version)+'#'+cidr})
                         msg['removed'].append(cidr)
 
+            elif key.lower() == 'delete':
+
+                code = 200
+                msg = 'Delete '+str(event['delete'])
+
+                if event['delete'] == 'all':
+                    rows = primarykey('IOC#')
+                    for row in rows:
+                        table.delete_item(
+                            Key = {
+                                'pk': row['pk'],
+                                'sk': row['sk']
+                            }
+                        )
+                elif event['delete'] == 'as':
+                    rows = primarykey('AS#')
+                    for row in rows:
+                        table.delete_item(
+                            Key = {
+                                'pk': row['pk'],
+                                'sk': row['sk']
+                            }
+                        )
+                elif event['delete'] == 'dns':
+                    rows = sortkey('IOC#', 'IOC#DNS#')
+                    for row in rows:
+                        table.delete_item(
+                            Key = {
+                                'pk': row['pk'],
+                                'sk': row['sk']
+                            }
+                        )
+                elif event['delete'] == 'ipv4':
+                    rows = sortkey('IOC#', 'IOC#IPV4#')
+                    for row in rows:
+                        table.delete_item(
+                            Key = {
+                                'pk': row['pk'],
+                                'sk': row['sk']
+                            }
+                        )
+                elif event['delete'] == 'ipv6':
+                    rows = sortkey('IOC#', 'IOC#IPV6#')
+                    for row in rows:
+                        table.delete_item(
+                            Key = {
+                                'pk': row['pk'],
+                                'sk': row['sk']
+                            }
+                        )
+
             elif key.lower() == 'list':
 
                 code = 200
