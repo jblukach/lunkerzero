@@ -29,11 +29,6 @@ class LunkerzeroGuineapigs(Stack):
             parameter_name = '/extensions/account'
         )
 
-        censys = _lambda.LayerVersion.from_layer_version_arn(
-            self, 'censys',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:censys:7'
-        )
-
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
             self, 'getpublicip',
             layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:12'
@@ -131,7 +126,6 @@ class LunkerzeroGuineapigs(Stack):
                 retry_attempts = 0,
                 role = role,
                 layers = [
-                    censys,
                     getpublicip,
                     requests
                 ]
