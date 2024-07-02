@@ -173,6 +173,39 @@ def handler(event, context):
                         table.delete_item(Key={'pk': 'AS#', 'sk': 'AS#IPV'+str(iptype.version)+'#'+cidr})
                         msg['removed'].append(cidr)
 
+            elif key.lower() == 'cidr':
+
+                code = 403
+                msg = 'Invalid '+str(event['cidr'])
+                try:
+                    hostmask = event['cidr'].split('/')
+                    if ipaddress.ip_network(hostmask[0]).version == 4:
+                        table.put_item(
+                            Item = {
+                                'pk': 'CIDR#',
+                                'sk': 'CIDR#IPV4#'+str(event['cidr']),
+                                'cidr': str(event['cidr'])
+                            }
+                        )
+                        code = 200
+                        msg = 'Added '+str(event['cidr'])
+                except:
+                    pass
+                try:
+                    hostmask = event['cidr'].split('/')
+                    if ipaddress.ip_network(hostmask[0]).version == 6:
+                        table.put_item(
+                            Item = {
+                                'pk': 'CIDR#',
+                                'sk': 'CIDR#IPV6#'+str(event['cidr']),
+                                'cidr': str(event['cidr'])
+                            }
+                        )
+                        code = 200
+                        msg = 'Added '+str(event['cidr'])
+                except:
+                    pass
+
             elif key.lower() == 'delete':
 
                 code = 200
@@ -189,6 +222,15 @@ def handler(event, context):
                         )
                 elif event['delete'] == 'as':
                     rows = primarykey('AS#')
+                    for row in rows:
+                        table.delete_item(
+                            Key = {
+                                'pk': row['pk'],
+                                'sk': row['sk']
+                            }
+                        )
+                elif event['delete'] == 'cidr':
+                    rows = primarykey('CIDR#')
                     for row in rows:
                         table.delete_item(
                             Key = {
@@ -229,6 +271,9 @@ def handler(event, context):
                 code = 200
                 if event['list'].lower() == 'as':
                     msg = primarykey('AS#')
+                    msg = [x['cidr'] for x in msg]
+                elif event['list'].lower() == 'cidr':
+                    msg = primarykey('CIDR#')
                     msg = [x['cidr'] for x in msg]
                 elif event['list'].lower() == 'dns':
                     msg = sortkey('IOC#', 'IOC#DNS#')
