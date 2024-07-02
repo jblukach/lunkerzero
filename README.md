@@ -80,4 +80,18 @@
 @aws invoke walleye --payload {"delete”: “as”}
 ```
 
+### Classless Inter-Domain Routing
+
+```
+@aws invoke walleye --payload {"cidr”:”127.0.0.1/24”}
+```
+
+```
+@aws invoke walleye --payload {"list”: “cidr”}
+```
+
+```
+@aws invoke walleye --payload {"delete”: “cidr”}
+```
+
 ![Lunker Zero (LZ)](images/lunkerzero.png)

@@ -112,7 +112,7 @@ class LunkerzeroVerification(Stack):
             function_name = 'tld',
             runtime = _lambda.Runtime.PYTHON_3_12,
             architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('lunker/verification/tld'),
+            code = _lambda.Code.from_asset('lunker/verification'),
             timeout = Duration.seconds(900),
             handler = 'tld.handler',
             environment = dict(

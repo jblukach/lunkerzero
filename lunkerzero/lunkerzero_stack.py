@@ -120,11 +120,7 @@ class LunkerzeroStack(Stack):
             ],
             resources = [
                 'arn:aws:lambda:'+region+':'+account+':function:walleye',
-                'arn:aws:lambda:'+region+':'+account+':function:bass',
                 'arn:aws:lambda:'+region+':'+account+':function:perch',
-                'arn:aws:lambda:'+region+':'+account+':function:pike',
-                'arn:aws:lambda:'+region+':'+account+':function:crappie',
-                'arn:aws:lambda:'+region+':'+account+':function:minnow',
                 'arn:aws:lambda:'+region+':'+account+':function:northern'
             ]
         )
@@ -151,38 +147,9 @@ class LunkerzeroStack(Stack):
             parameter_name = '/slack/lunkerzero'
         )
 
-        channelwalleye = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelwalleye',
-            parameter_name = '/slack/walleye'
-        )
-        channelbass = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelbass',
-            parameter_name = '/slack/bass'
-        )
-
-        channelperch = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelperch',
-            parameter_name = '/slack/perch'
-        )
-
-        channelpike = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelpike',
-            parameter_name = '/slack/pike'
-        )
-
-        channelcrappie = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelcrappie',
-            parameter_name = '/slack/crappie'
-        )
-
-        channelminnow = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelminnow',
-            parameter_name = '/slack/minnow'
-        )
-
-        channelnorthern = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'channelnorthern',
-            parameter_name = '/slack/northern'
+        channellunker = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'channellunker',
+            parameter_name = '/slack/lunker'
         )
 
     ### CHATBOT LUNKERZERO ###
@@ -196,6 +163,8 @@ class LunkerzeroStack(Stack):
         )
 
         slacklunkerzero.add_to_role_policy(cwlperm)
+        slacklunkerzero.add_to_role_policy(iamperm)
+        slacklunkerzero.add_to_role_policy(oamperm)
 
         topiclunkerzero = _sns.Topic(
             self, 'topiclunkerzero',
@@ -204,177 +173,31 @@ class LunkerzeroStack(Stack):
         )
 
         slacklunkerzero.add_notification_topic(topiclunkerzero)
-        slacklunkerzero.add_to_role_policy(oamperm)
-        slacklunkerzero.add_to_role_policy(iamperm)
 
         slacklunkerzero.apply_removal_policy(
             RemovalPolicy.DESTROY    
         )
 
-    ### CHATBOT WALLEYE ###
+    ### CHATBOT LUNKER ###
 
-        slackwalleye = _chatbot.SlackChannelConfiguration(
-            self, 'slackwalleye',
+        slacklunker = _chatbot.SlackChannelConfiguration(
+            self, 'slacklunker',
             logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'walleye',
+            slack_channel_configuration_name = 'lunker',
             slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelwalleye.string_value
+            slack_channel_id = channellunker.string_value
         )
 
-        slackwalleye.add_to_role_policy(lambdaperm)
+        slacklunker.add_to_role_policy(lambdaperm)
 
-        topicwalleye = _sns.Topic(
-            self, 'topicwalleye',
-            display_name = 'walleye',
-            topic_name = 'walleye'
+        topiclunker = _sns.Topic(
+            self, 'topiclunker',
+            display_name = 'lunker',
+            topic_name = 'lunker'
         )
 
-        slackwalleye.add_notification_topic(topicwalleye)
+        slacklunker.add_notification_topic(topiclunker)
 
-        slackwalleye.apply_removal_policy(
-            RemovalPolicy.DESTROY    
-        )
-
-    ### CHATBOT BASS ###
-
-        slackbass = _chatbot.SlackChannelConfiguration(
-            self, 'slackbass',
-            logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'bass',
-            slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelbass.string_value
-        )
-
-        slackbass.add_to_role_policy(lambdaperm)
-
-        topicbass = _sns.Topic(
-            self, 'topicbass',
-            display_name = 'bass',
-            topic_name = 'bass'
-        )
-
-        slackbass.add_notification_topic(topicbass)
-
-        slackbass.apply_removal_policy(
-            RemovalPolicy.DESTROY    
-        )
-
-    ### CHATBOT PERCH ###
-
-        slackperch = _chatbot.SlackChannelConfiguration(
-            self, 'slackperch',
-            logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'perch',
-            slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelperch.string_value
-        )
-
-        slackperch.add_to_role_policy(lambdaperm)
-
-        topicperch = _sns.Topic(
-            self, 'topicperch',
-            display_name = 'perch',
-            topic_name = 'perch'
-        )
-
-        slackperch.add_notification_topic(topicperch)
-
-        slackperch.apply_removal_policy(
-            RemovalPolicy.DESTROY    
-        )
-
-    ### CHATBOT PIKE ###
-
-        slackpike = _chatbot.SlackChannelConfiguration(
-            self, 'slackpike',
-            logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'pike',
-            slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelpike.string_value
-        )
-
-        slackpike.add_to_role_policy(lambdaperm)
-
-        topicpike = _sns.Topic(
-            self, 'topicpike',
-            display_name = 'pike',
-            topic_name = 'pike'
-        )
-
-        slackpike.add_notification_topic(topicpike)
-
-        slackpike.apply_removal_policy(
-            RemovalPolicy.DESTROY    
-        )
-
-    ### CHATBOT CRAPPIE ###
-
-        slackcrappie = _chatbot.SlackChannelConfiguration(
-            self, 'slackcrappie',
-            logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'crappie',
-            slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelcrappie.string_value
-        )
-
-        slackcrappie.add_to_role_policy(lambdaperm)
-
-        topiccrappie = _sns.Topic(
-            self, 'topiccrappie',
-            display_name = 'crappie',
-            topic_name = 'crappie'
-        )
-
-        slackcrappie.add_notification_topic(topiccrappie)
-
-        slackcrappie.apply_removal_policy(
-            RemovalPolicy.DESTROY    
-        )
-
-    ### CHATBOT MINNOW ###
-
-        slackminnow = _chatbot.SlackChannelConfiguration(
-            self, 'slackminnow',
-            logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'minnow',
-            slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelminnow.string_value
-        )
-
-        slackminnow.add_to_role_policy(lambdaperm)
-
-        topicminnow = _sns.Topic(
-            self, 'topicminnow',
-            display_name = 'minnow',
-            topic_name = 'minnow'
-        )
-
-        slackminnow.add_notification_topic(topicminnow)
-
-        slackminnow.apply_removal_policy(
-            RemovalPolicy.DESTROY    
-        )
-
-    ### CHATBOT NORTHERN ###
-
-        slacknorthern = _chatbot.SlackChannelConfiguration(
-            self, 'slacknorthern',
-            logging_level = _chatbot.LoggingLevel.INFO,
-            slack_channel_configuration_name = 'northern',
-            slack_workspace_id = workspace.string_value,
-            slack_channel_id = channelnorthern.string_value
-        )
-
-        slacknorthern.add_to_role_policy(lambdaperm)
-
-        topicnorthern = _sns.Topic(
-            self, 'topicnorthern',
-            display_name = 'northern',
-            topic_name = 'northern'
-        )
-
-        slacknorthern.add_notification_topic(topicnorthern)
-
-        slacknorthern.apply_removal_policy(
+        slacklunker.apply_removal_policy(
             RemovalPolicy.DESTROY    
         )
