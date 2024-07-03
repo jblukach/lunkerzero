@@ -1,5 +1,4 @@
 import boto3
-import json
 import ipaddress
 import os
 import requests
@@ -63,10 +62,12 @@ def handler(event, context):
                 count = primarykey('IOC#')
                 if len(count) >= int(os.environ['LUNKER_LIMIT']):
                     code = 403
-                    msg = 'Maximum Quota Reached'
+                    msg = {}
+                    msg['quota'] = str(os.environ['LUNKER_LIMIT'])
                 else:
                     code = 403
-                    msg = 'Invalid '+str(event['add'])
+                    msg = {}
+                    msg['invalid'] = str(event['add'])
                     try:
                         if ipaddress.ip_network(event['add']).version == 4:
                             table.put_item(
@@ -77,7 +78,8 @@ def handler(event, context):
                                 }
                             )
                             code = 200
-                            msg = 'Added '+str(event['add'])
+                            msg = {}
+                            msg['added'] = str(event['add'])
                     except:
                         pass
                     try:
@@ -90,7 +92,8 @@ def handler(event, context):
                                 }
                             )
                             code = 200
-                            msg = 'Added '+str(event['add'])
+                            msg = {}
+                            msg['added'] = str(event['add'])
                     except:
                         pass
                     try:
@@ -109,7 +112,8 @@ def handler(event, context):
                                 }
                             )
                             code = 200
-                            msg = 'Added '+str(event['add'])
+                            msg = {}
+                            msg['added'] = str(event['add'])
                     except:
                         pass
 
@@ -176,7 +180,8 @@ def handler(event, context):
             elif key.lower() == 'cidr':
 
                 code = 403
-                msg = 'Invalid '+str(event['cidr'])
+                msg = {}
+                msg['invalid'] = str(event['cidr'])
                 try:
                     hostmask = event['cidr'].split('/')
                     if ipaddress.ip_network(hostmask[0]).version == 4:
@@ -188,7 +193,8 @@ def handler(event, context):
                             }
                         )
                         code = 200
-                        msg = 'Added '+str(event['cidr'])
+                        msg = {}
+                        msg['added'] = str(event['cidr'])
                 except:
                     pass
                 try:
@@ -202,14 +208,16 @@ def handler(event, context):
                             }
                         )
                         code = 200
-                        msg = 'Added '+str(event['cidr'])
+                        msg = {}
+                        msg['added'] = str(event['cidr'])
                 except:
                     pass
 
             elif key.lower() == 'delete':
 
                 code = 200
-                msg = 'Delete '+str(event['delete'])
+                msg = {}
+                msg['deleted'] = str(event['delete'])
 
                 if event['delete'] == 'all':
                     rows = primarykey('IOC#')
@@ -269,29 +277,31 @@ def handler(event, context):
             elif key.lower() == 'list':
 
                 code = 200
+                msg = {}
                 if event['list'].lower() == 'as':
-                    msg = primarykey('AS#')
-                    msg = [x['cidr'] for x in msg]
+                    values = primarykey('AS#')
+                    msg['list'] = [x['cidr'] for x in values]
                 elif event['list'].lower() == 'cidr':
-                    msg = primarykey('CIDR#')
-                    msg = [x['cidr'] for x in msg]
+                    values = primarykey('CIDR#')
+                    msg['list'] = [x['cidr'] for x in values]
                 elif event['list'].lower() == 'dns':
-                    msg = sortkey('IOC#', 'IOC#DNS#')
-                    msg = [x['ioc'] for x in msg]
+                    values = sortkey('IOC#', 'IOC#DNS#')
+                    msg['list'] = [x['ioc'] for x in values]
                 elif event['list'].lower() == 'ipv4':
-                    msg = sortkey('IOC#', 'IOC#IPV4#')
-                    msg = [x['ioc'] for x in msg]
+                    values = sortkey('IOC#', 'IOC#IPV4#')
+                    msg['list'] = [x['ioc'] for x in values]
                 elif event['list'].lower() == 'ipv6':
-                    msg = sortkey('IOC#', 'IOC#IPV6#')
-                    msg = [x['ioc'] for x in msg]
+                    values = sortkey('IOC#', 'IOC#IPV6#')
+                    msg['list'] = [x['ioc'] for x in values]
                 else:
-                    msg = primarykey('IOC#')
-                    msg = [x['ioc'] for x in msg]
+                    values = primarykey('IOC#')
+                    msg['list'] = [x['ioc'] for x in values]
 
             elif key.lower() == 'remove':
 
                 code = 403
-                msg = 'Failure '+str(event['remove'])
+                msg = {}
+                msg['failure'] = str(event['remove'])
                 try:
                     if ipaddress.ip_network(event['remove']).version == 4:
                         table.delete_item(
@@ -300,7 +310,8 @@ def handler(event, context):
                                 'sk': 'IOC#IPV4#'+str(event['remove'])
                             }
                         )
-                        msg = 'Removed '+str(event['remove'])
+                        msg = {}
+                        msg['removed'] = str(event['remove'])
                 except:
                     pass
                 try:
@@ -311,7 +322,8 @@ def handler(event, context):
                                 'sk': 'IOC#IPV6#'+str(event['remove'])
                             }
                         )
-                        msg = 'Removed '+str(event['remove'])
+                        msg = {}
+                        msg['removed'] = str(event['remove'])
                 except:
                     pass
                 try:
@@ -328,7 +340,8 @@ def handler(event, context):
                                 'sk': 'IOC#DNS#'+str(event['remove']).lower()
                             }
                         )
-                        msg = 'Removed '+str(event['remove'])
+                        msg = {}
+                        msg['removed'] = str(event['remove'])
                 except:
                     pass
 
@@ -338,5 +351,5 @@ def handler(event, context):
 
     return {
         'statusCode': code,
-        'body': json.dumps(msg)
+        'body': msg
     }
