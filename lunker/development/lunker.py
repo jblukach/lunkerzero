@@ -274,6 +274,66 @@ def handler(event, context):
                             }
                         )
 
+            elif key.lower() == 'handle':
+
+                cidrlist = []
+                existing = primarykey('AS#')
+                existing = [x['cidr'] for x in existing]
+
+                headers = {'User-Agent': 'Lunker Zero a.k.a. LZ (https://github.com/jblukach/lunkerzero)'}
+                r = requests.get('https://rdap.arin.net/registry/entity/'+str(event['handle'].upper()), headers=headers)
+                data = r.json()
+
+                code = 200
+                msg = {}
+                msg['added'] = []
+                msg['removed'] = []
+
+                for item in data['networks']:
+
+                    if item['ipVersion'] == 'v4':
+
+                        value = item['cidr0_cidrs'][0]['v4prefix']+'/'+str(item['cidr0_cidrs'][0]['length'])
+                        cidrlist.append(value)
+
+                        if value not in existing:
+
+                            table.put_item(
+                                Item = {
+                                    'pk': 'AS#',
+                                    'sk': 'AS#IPV4#'+value,
+                                    'name': data['autnums'][0]['handle'],
+                                    'cidr': value
+                                }
+                            )
+                            msg['added'].append(value)
+
+                    elif item['ipVersion'] == 'v6':
+
+                        value = item['cidr0_cidrs'][0]['v6prefix']+'/'+str(item['cidr0_cidrs'][0]['length'])
+                        cidrlist.append(value)
+
+                        if value not in existing:
+
+                            table.put_item(
+                                Item = {
+                                    'pk': 'AS#',
+                                    'sk': 'AS#IPV6#'+value,
+                                    'name': data['autnums'][0]['handle'],
+                                    'cidr': value
+                                }
+                            )
+                            msg['added'].append(value)
+
+                for cidr in existing:
+
+                    if cidr not in cidrlist:
+
+                        hostmask = cidr.split('/')
+                        iptype = ipaddress.ip_address(hostmask[0])
+                        table.delete_item(Key={'pk': 'AS#', 'sk': 'AS#IPV'+str(iptype.version)+'#'+cidr})
+                        msg['removed'].append(cidr)
+
             elif key.lower() == 'list':
 
                 code = 200

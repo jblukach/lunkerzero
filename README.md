@@ -73,6 +73,10 @@
 ```
 
 ```
+@aws invoke walleye --payload {"handle”:”FAKE-1”}
+```
+
+```
 @aws invoke walleye --payload {"list”: “as”}
 ```
 
