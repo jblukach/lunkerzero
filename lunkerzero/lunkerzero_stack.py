@@ -121,7 +121,8 @@ class LunkerzeroStack(Stack):
             resources = [
                 'arn:aws:lambda:'+region+':'+account+':function:walleye',
                 'arn:aws:lambda:'+region+':'+account+':function:perch',
-                'arn:aws:lambda:'+region+':'+account+':function:northern'
+                'arn:aws:lambda:'+region+':'+account+':function:northern',
+                'arn:aws:lambda:'+region+':'+account+':function:pike'
             ]
         )
 

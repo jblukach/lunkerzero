@@ -34,6 +34,11 @@ class LunkerzeroDevelopment(Stack):
             layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:12'
         )
 
+        netaddr = _lambda.LayerVersion.from_layer_version_arn(
+            self, 'netaddr',
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:netaddr:7'
+        )
+
         requests = _lambda.LayerVersion.from_layer_version_arn(
             self, 'requests',
             layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:requests:5'
@@ -66,10 +71,22 @@ class LunkerzeroDevelopment(Stack):
                 actions = [
                     'dynamodb:DeleteItem',
                     'dynamodb:PutItem',
-                    'dynamodb:Query'
+                    'dynamodb:Query',
+                    's3:GetObject'
                 ],
                 resources = [
                     '*'
+                ]
+            )
+        )
+
+        role.add_to_policy(
+            _iam.PolicyStatement(
+                actions = [
+                    'securityhub:BatchImportFindings'
+                ],
+                resources = [
+                    'arn:aws:securityhub:'+region+':'+account+':product/'+account+'/default'
                 ]
             )
         )
@@ -115,12 +132,10 @@ class LunkerzeroDevelopment(Stack):
                 handler = 'lunker.handler',
                 environment = dict(
                     AWS_ACCOUNT = account,
-                    CENSYS_API_ID = '-',
-                    CENSYS_API_SECRET = '-',
                     DYNAMODB_TABLE = table.table_name,
                     DYNAMODB_TLDTABLE = tld.string_value,
                     LUNKER_FISH = fish,
-                    LUNKER_LIMIT = '10'
+                    LUNKER_LIMIT = '100'
                 ),
                 memory_size = 512,
                 retry_attempts = 0,
@@ -149,5 +164,52 @@ class LunkerzeroDevelopment(Stack):
             )
 
             alarm.add_alarm_action(
+                _actions.SnsAction(topic)
+            )
+
+            angler = _lambda.Function(
+                self, 'angler'+fish,
+                function_name = fish+'hook',
+                runtime = _lambda.Runtime.PYTHON_3_12,
+                architecture = _lambda.Architecture.ARM_64,
+                code = _lambda.Code.from_asset('lunker/development'),
+                timeout = Duration.seconds(900),
+                handler = 'angler.handler',
+                environment = dict(
+                    AWS_ACCOUNT = account,
+                    CENSYS_API_ID = '-',
+                    CENSYS_API_SECRET = '-',
+                    DYNAMODB_TABLE = table.table_name,
+                    LUNKER_FISH = fish,
+                    REGION = region,
+                    S3_BUCKET = 'cloudcruftbucket'
+                ),
+                memory_size = 512,
+                retry_attempts = 0,
+                role = role,
+                layers = [
+                    getpublicip,
+                    netaddr
+                ]
+            )
+
+            cwl = _logs.LogGroup(
+                self, 'cwl'+fish,
+                log_group_name = '/aws/lambda/'+angler.function_name,
+                retention = _logs.RetentionDays.ONE_DAY,
+                removal_policy = RemovalPolicy.DESTROY
+            )
+
+            cwa = _cloudwatch.Alarm(
+                self, 'cwa'+fish,
+                comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+                threshold = 0,
+                evaluation_periods = 1,
+                metric = angler.metric_errors(
+                    period = Duration.minutes(1)
+                )
+            )
+
+            cwa.add_alarm_action(
                 _actions.SnsAction(topic)
             )

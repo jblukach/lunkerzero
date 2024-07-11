@@ -98,4 +98,20 @@
 @aws invoke walleye --payload {"delete”: “cidr”}
 ```
 
+## Amazon EventBridge Rules
+
+### Open Source Intelligence
+
+```
+{"osint”: “dns”}
+```
+
+```
+{"osint”: “ipv4”}
+```
+
+```
+{"osint”: “ipv6”}
+```
+
 ![Lunker Zero (LZ)](images/lunkerzero.png)
