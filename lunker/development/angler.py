@@ -43,7 +43,7 @@ def alertnotify(title, description):
                 "FindingProviderFields": {
                     "Confidence": 100,
                     "Severity": {
-                        "Label": "HIGH"
+                        "Label": "MEDIUM"
                     },
                     "Types": [
                         "security/lunkerzero"
@@ -52,19 +52,6 @@ def alertnotify(title, description):
             }
         ]
     )
-
-def primarykey(pk):
-    response = table.query(
-        KeyConditionExpression = Key('pk').eq(pk)
-    )
-    results = response['Items']
-    while 'LastEvaluatedKey' in response:
-        response = table.query(
-            KeyConditionExpression = Key('pk').eq(pk),
-            ExclusiveStartKey = response['LastEvaluatedKey']
-        )
-        results.update(response['Items'])
-    return results
 
 def sortkey(pk, sk):
     response = table.query(
@@ -104,7 +91,7 @@ def handler(event, context):
 
                 matchlist = list(set(addresses) & set(comparison))
 
-                artifacts = primarykey('OSINT#')
+                artifacts = sortkey('OSINT#','OSINT#DNS#')
                 artifacts = [x['osint'] for x in artifacts]
 
                 for match in matchlist:
@@ -158,7 +145,7 @@ def handler(event, context):
 
                 matchlist = list(set(addresses) & set(comparison))
 
-                artifacts = primarykey('OSINT#')
+                artifacts = sortkey('OSINT#','OSINT#IPV4#')
                 artifacts = [x['osint'] for x in artifacts]
 
                 for match in matchlist:
@@ -233,7 +220,7 @@ def handler(event, context):
                 with open('/tmp/ipv6.txt', 'r') as f:
                     ipv6s = f.read().splitlines()
 
-                artifacts = primarykey('OSINT#')
+                artifacts = sortkey('OSINT#','OSINT#IPV6#')
                 artifacts = [x['osint'] for x in artifacts]
 
                 conn = sqlite3.connect('/tmp/distillery.sqlite3')
