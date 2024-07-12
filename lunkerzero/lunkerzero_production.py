@@ -31,6 +31,11 @@ class LunkerzeroProduction(Stack):
             parameter_name = '/extensions/account'
         )
 
+        censys = _lambda.LayerVersion.from_layer_version_arn(
+            self, 'censys',
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:censys:7'
+        )
+
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
             self, 'getpublicip',
             layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:12'
@@ -74,7 +79,8 @@ class LunkerzeroProduction(Stack):
                     'dynamodb:DeleteItem',
                     'dynamodb:PutItem',
                     'dynamodb:Query',
-                    's3:GetObject'
+                    's3:GetObject',
+                    'ssm:GetParameter'
                 ],
                 resources = [
                     '*'
@@ -192,6 +198,7 @@ class LunkerzeroProduction(Stack):
                 retry_attempts = 0,
                 role = role,
                 layers = [
+                    censys,
                     getpublicip,
                     netaddr
                 ]
@@ -226,6 +233,17 @@ class LunkerzeroProduction(Stack):
                     month = '*',
                     week_day = '*',
                     year = '*'
+                )
+            )
+
+            event.add_target(
+                _targets.LambdaFunction(
+                    angler,
+                    event = _events.RuleTargetInput.from_object(
+                        {
+                            "censys": "search"
+                        }
+                    )
                 )
             )
 

@@ -9,6 +9,7 @@ table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 tldtable = dynamodb.Table(os.environ['DYNAMODB_TLDTABLE'])
 
 def primarykey(pk):
+
     response = table.query(
         KeyConditionExpression = Key('pk').eq(pk)
     )
@@ -22,6 +23,7 @@ def primarykey(pk):
     return results
 
 def sortkey(pk, sk):
+
     response = table.query(
         KeyConditionExpression = Key('pk').eq(pk) & Key('sk').begins_with(sk)
     )
@@ -35,6 +37,7 @@ def sortkey(pk, sk):
     return results
 
 def tldlist(pk):
+
     response = tldtable.query(
         KeyConditionExpression = Key('pk').eq(pk)
     )
@@ -48,8 +51,6 @@ def tldlist(pk):
     return results
 
 def handler(event, context):
-
-    print(event) ### DEBUG ###
 
     try:
 

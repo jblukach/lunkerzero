@@ -5,10 +5,12 @@ import os
 import netaddr
 import sqlite3
 from boto3.dynamodb.conditions import Key
+from censys.search import CensysHosts
 from datetime import datetime, timezone
 
 s3 = boto3.client('s3')
 sns = boto3.client('sns')
+ssm = boto3.client('ssm')
 securityhub = boto3.client('securityhub')
 
 dynamodb = boto3.resource('dynamodb')
@@ -54,6 +56,7 @@ def alertnotify(title, description):
     )
 
 def sortkey(pk, sk):
+
     response = table.query(
         KeyConditionExpression = Key('pk').eq(pk) & Key('sk').begins_with(sk)
     )
@@ -72,7 +75,67 @@ def handler(event, context):
 
     for key in keys:
 
-        if key.lower() == 'osint':
+        if key.lower() == 'censys':
+
+            if event[key].lower() == 'search':
+
+                asns = sortkey('AS#','AS#')
+                asns = [x['name'][2:] for x in asns]
+                asns = list(set(asns))
+
+                if len(asns) == 1:
+
+                    api = ssm.get_parameter(Name='/censys/api', WithDecryption=True)['Parameter']['Value']
+                    key = ssm.get_parameter(Name='/censys/key', WithDecryption=True)['Parameter']['Value']
+
+                    os.environ['CENSYS_API_ID'] = api
+                    os.environ['CENSYS_API_SECRET'] = key
+
+                    h = CensysHosts()
+
+                    query = h.search(
+                        'autonomous_system.asn: '+asns[0],
+                        per_page = 100,
+                        pages = 100,
+                        fields = [
+                            'services.port'
+                        ]
+                    )
+
+                    ports = sortkey('PORT#','PORT#')
+                    ports = [x['sk'] for x in ports]
+
+                    opened = []
+
+                    for page in query:
+
+                        for address in page:
+
+                            for port in address['services']:
+
+                                opened.append('PORT#'+str(port['port'])+'#IP#'+str(address['ip']))
+
+                                if 'PORT#'+str(port['port'])+'#IP#'+str(address['ip']) not in ports:
+
+                                    table.put_item(
+                                        Item = {
+                                            'pk': 'PORT#',
+                                            'sk': 'PORT#'+str(port['port'])+'#IP#'+str(address['ip']),
+                                            'address': str(address['ip']),
+                                            'port': str(port['port'])
+                                        }
+                                    )
+                                    alertnotify('PORT Opened', str(address['ip'])+':'+str(port['port']))
+
+                    for address in ports:
+
+                        if address not in opened:
+
+                            table.delete_item(Key={'pk': 'PORT#', 'sk': address})
+                            output = address.split('#')
+                            alertnotify('PORT Closed', output[3]+':'+output[1])
+
+        elif key.lower() == 'osint':
 
             if event[key].lower() == 'dns':
 

@@ -100,6 +100,12 @@
 
 ## Amazon EventBridge Rules
 
+### Censys Search
+
+```
+{"censys”: “search”}
+```
+
 ### Open Source Intelligence
 
 ```
