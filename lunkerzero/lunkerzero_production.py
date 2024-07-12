@@ -103,6 +103,7 @@ class LunkerzeroProduction(Stack):
      ### LUNKER ###
 
         fishes = []
+        fishes.append('carp')
         fishes.append('northern')
         fishes.append('pike')
 
@@ -138,7 +139,7 @@ class LunkerzeroProduction(Stack):
                     DYNAMODB_TABLE = table.table_name,
                     DYNAMODB_TLDTABLE = tld.string_value,
                     LUNKER_FISH = fish,
-                    LUNKER_LIMIT = '100'
+                    LUNKER_LIMIT = '250'
                 ),
                 memory_size = 512,
                 retry_attempts = 0,
