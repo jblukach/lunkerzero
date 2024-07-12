@@ -2,6 +2,8 @@
 
 ## AWS Chatbot for Slack
 
+![Input Diagram](images/input-diagram.png)
+
 ### Add Artifact
 
 ```
@@ -99,6 +101,8 @@
 ```
 
 ## Amazon EventBridge Rules
+
+![Output Diagram](images/output-diagram.png)
 
 ### Censys Search
 
