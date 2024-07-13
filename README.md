@@ -1,5 +1,31 @@
 # lunkerzero
 
+Lunker Zero, a.k.a. LZ, performs Threat Surface monitoring with ChatOps to detect Internet-accessible network risk and Open Source Intelligence reputation.
+
+The application has three environments for developing new detections that can be promoted once ready.
+
+ - Development
+ - Guinea Pigs
+ - Production
+
+Threat Surface monitoring results get separated by deploying new **code names** for each Amazon Web Services (AWS) cloud investigation.
+
+ - Walleye
+ - Perch
+ - Northern
+
+Slack notifications are received when a monitored DNS, IPv4, or IPv6 is added/removed from checked OSINT threat feeds.
+
+Censys Search also provides Slack notifications when ports are opened/closed from the Autonomous System (AS) number query results.
+
+Why did I pick **Censys** for the Internet searches?
+
+**FREE** access to the API for the first sixty days so you can determine your organization's value before committing.
+
+https://censys.com
+
+Knowing is half the battle, making an excellent capability addition!
+
 ## AWS Chatbot for Slack
 
 ![Input Diagram](images/input-diagram.png)

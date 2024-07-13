@@ -119,10 +119,11 @@ class LunkerzeroStack(Stack):
                 'lambda:InvokeFunction'
             ],
             resources = [
-                'arn:aws:lambda:'+region+':'+account+':function:walleye',
-                'arn:aws:lambda:'+region+':'+account+':function:perch',
+                'arn:aws:lambda:'+region+':'+account+':function:carp',
                 'arn:aws:lambda:'+region+':'+account+':function:northern',
-                'arn:aws:lambda:'+region+':'+account+':function:pike'
+                'arn:aws:lambda:'+region+':'+account+':function:perch',
+                'arn:aws:lambda:'+region+':'+account+':function:pike',
+                'arn:aws:lambda:'+region+':'+account+':function:walleye'
             ]
         )
 
