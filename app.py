@@ -5,6 +5,7 @@ import aws_cdk as cdk
 
 from lunkerzero.lunkerzero_development import LunkerzeroDevelopment
 from lunkerzero.lunkerzero_guineapigs import LunkerzeroGuineapigs
+from lunkerzero.lunkerzero_inspection import LunkerzeroInspection
 from lunkerzero.lunkerzero_production import LunkerzeroProduction
 from lunkerzero.lunkerzero_stack import LunkerzeroStack
 from lunkerzero.lunkerzero_verification import LunkerzeroVerification
@@ -24,6 +25,17 @@ LunkerzeroDevelopment(
 
 LunkerzeroGuineapigs(
     app, 'LunkerzeroGuineapigs',
+    env = cdk.Environment(
+        account = os.getenv('CDK_DEFAULT_ACCOUNT'),
+        region = 'us-east-1'
+    ),
+    synthesizer = cdk.DefaultStackSynthesizer(
+        qualifier = '4n6ir'
+    )
+)
+
+LunkerzeroInspection(
+    app, 'LunkerzeroInspection',
     env = cdk.Environment(
         account = os.getenv('CDK_DEFAULT_ACCOUNT'),
         region = 'us-east-1'
