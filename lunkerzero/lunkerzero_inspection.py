@@ -21,6 +21,9 @@ class LunkerzeroInspection(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        account = Stack.of(self).account
+        region = Stack.of(self).region
+
         epoch = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
 
     ### S3 BUCKET ###
@@ -36,16 +39,40 @@ class LunkerzeroInspection(Stack):
             versioned = False
         )
 
-        bucket.add_lifecycle_rule(
-            expiration = Duration.days(1),
-            noncurrent_version_expiration = Duration.days(1)
-        )
+        #bucket.add_lifecycle_rule(
+        #    expiration = Duration.days(1),
+        #    noncurrent_version_expiration = Duration.days(1)
+        #)
 
         bucketname = _ssm.StringParameter(
             self, 'bucketname',
-            description = 'Lunker Zero S3 Bucket',
-            parameter_name = '/lunkerzero/bucket',
+            description = 'Lunker Zero Inspection',
+            parameter_name = '/lunkerzero/inspection',
             string_value = bucket.bucket_name,
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
+        download = _s3.Bucket(
+            self, 'download',
+            bucket_name = 'lunkerdownload',
+            encryption = _s3.BucketEncryption.S3_MANAGED,
+            block_public_access = _s3.BlockPublicAccess.BLOCK_ALL,
+            removal_policy = RemovalPolicy.DESTROY,
+            auto_delete_objects = True,
+            enforce_ssl = True,
+            versioned = False
+        )
+
+        #download.add_lifecycle_rule(
+        #    expiration = Duration.days(1),
+        #    noncurrent_version_expiration = Duration.days(1)
+        #)
+
+        downloadname = _ssm.StringParameter(
+            self, 'downloadname',
+            description = 'Lunker Zero Download',
+            parameter_name = '/lunkerzero/download',
+            string_value = download.bucket_name,
             tier = _ssm.ParameterTier.STANDARD,
         )
 
@@ -62,7 +89,7 @@ class LunkerzeroInspection(Stack):
                     's3:PutObject'
                 ],
                 resources = [
-                    bucket.arn_for_objects('*')
+                    download.arn_for_objects('*')
                 ]
             )
         )
@@ -74,7 +101,7 @@ class LunkerzeroInspection(Stack):
                     's3:GetBucketLocation'
                 ],
                 resources = [
-                    bucket.bucket_arn
+                    download.bucket_arn
                 ]
             )
         )
@@ -188,10 +215,12 @@ class LunkerzeroInspection(Stack):
             image = _ecs.ContainerImage.from_asset('lunker/inspection'),
             logging = logging,
             environment = {
-                'INSPECT_URL': 'https://www.eicar.org/download-anti-malware-testfile/',
-                'STORE_ENDPOINT_URL': bucket.url_for_object(),
+                'INSPECT_URL': 'https://eicar.org',
+                'STORE_ENDPOINT_URL': download.url_for_object(),
+                'STORE_REGION': region,
                 'STORE_PATH': '/eicar.org/',
-                'STORE_FILENAME': 'eicar.org.wacz'
+                'STORE_FILENAME': 'eicar.org.wacz',
+                'CRAWL_ID': 'eicar.org'
             },
             secrets = {
                 'STORE_ACCESS_KEY': _ecs.Secret.from_secrets_manager(secret, 'accesskey'),
