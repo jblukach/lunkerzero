@@ -22,7 +22,7 @@ Why did I pick **Censys** for the Internet searches?
 
 **FREE** access to the API for the first sixty days so you can determine your organization's value before committing.
 
-https://censys.com
+https://search.censys.io
 
 Knowing is half the battle, making an excellent capability addition!
 

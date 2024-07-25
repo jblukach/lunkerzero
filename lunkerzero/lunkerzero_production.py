@@ -241,17 +241,6 @@ class LunkerzeroProduction(Stack):
                     angler,
                     event = _events.RuleTargetInput.from_object(
                         {
-                            "censys": "search"
-                        }
-                    )
-                )
-            )
-
-            event.add_target(
-                _targets.LambdaFunction(
-                    angler,
-                    event = _events.RuleTargetInput.from_object(
-                        {
                             "osint": "dns"
                         }
                     )
@@ -275,6 +264,28 @@ class LunkerzeroProduction(Stack):
                     event = _events.RuleTargetInput.from_object(
                         {
                             "osint": "ipv6"
+                        }
+                    )
+                )
+            )
+
+            daily = _events.Rule(
+                self, 'daily'+fish,
+                schedule = _events.Schedule.cron(
+                    minute = '7',
+                    hour = '11',
+                    month = '*',
+                    week_day = '*',
+                    year = '*'
+                )
+            )
+
+            daily.add_target(
+                _targets.LambdaFunction(
+                    angler,
+                    event = _events.RuleTargetInput.from_object(
+                        {
+                            "censys": "search"
                         }
                     )
                 )
