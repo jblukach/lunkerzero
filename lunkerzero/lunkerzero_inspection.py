@@ -177,15 +177,27 @@ class LunkerzeroInspection(Stack):
             removal_policy = RemovalPolicy.DESTROY
         )
 
-        logging = _ecs.AwsLogDriver(
+        inspectionlogs = _ecs.AwsLogDriver(
             stream_prefix = 'inspection',
+            log_group = logs
+        )
+
+        expansionlogs = _ecs.AwsLogDriver(
+            stream_prefix = 'expansion',
             log_group = logs
         )
 
     ### FARGATE TASK ###
 
-        task = _ecs.TaskDefinition(
-            self, 'task',
+        inspectiontask = _ecs.TaskDefinition(
+            self, 'inspectiontask',
+            cpu = '2048',
+            memory_mib = '4096',
+            compatibility = _ecs.Compatibility.FARGATE
+        )
+
+        expansiontask = _ecs.TaskDefinition(
+            self, 'expansiontask',
             cpu = '2048',
             memory_mib = '4096',
             compatibility = _ecs.Compatibility.FARGATE
@@ -206,14 +218,30 @@ class LunkerzeroInspection(Stack):
             ]
         )
 
-        task.add_to_task_role_policy(task_policy)
+        inspectiontask.add_to_task_role_policy(task_policy)
+        expansiontask.add_to_task_role_policy(task_policy)
+
+        task_policy = _iam.PolicyStatement(
+            effect = _iam.Effect.ALLOW,
+            actions = [
+                's3:GetObject',
+                's3:PutObject'
+            ],
+            resources = [
+                bucket.arn_for_objects('*'),
+                download.arn_for_objects('*')
+            ]
+        )
+
+        inspectiontask.add_to_task_role_policy(task_policy)
+        expansiontask.add_to_task_role_policy(task_policy)
 
     ### FARGATE CONTAINER ###
 
-        container = task.add_container(
-            'container',
+        inspectioncontainer = inspectiontask.add_container(
+            'inspectioncontainer',
             image = _ecs.ContainerImage.from_asset('lunker/inspection'),
-            logging = logging,
+            logging = inspectionlogs,
             environment = {
                 'INSPECT_URL': 'https://eicar.org',
                 'STORE_ENDPOINT_URL': download.url_for_object(),
@@ -228,6 +256,17 @@ class LunkerzeroInspection(Stack):
             }
         )
 
+        expansioncontainer = expansiontask.add_container(
+            'expansioncontainer',
+            image = _ecs.ContainerImage.from_asset('lunker/expansion'),
+            logging = expansionlogs,
+            environment = {
+                'CRAWL_ID': 'eicar.org',
+                'S3_DOWNLOAD': download.bucket_name,
+                'S3_INSPECT': bucket.bucket_name
+            }
+        )
+
     ### PARAMETERS ###
 
         clustername = _ssm.StringParameter(
@@ -238,18 +277,34 @@ class LunkerzeroInspection(Stack):
             tier = _ssm.ParameterTier.STANDARD,
         )
 
-        taskdef = _ssm.StringParameter(
-            self, 'taskdef',
-            description = 'Lunker Zero Fargate Task',
-            parameter_name = '/fargate/task',
-            string_value = task.task_definition_arn,
+        inspectiontaskdef = _ssm.StringParameter(
+            self, 'inspectiontaskdef',
+            description = 'Lunker Zero Inspection Task',
+            parameter_name = '/fargate/inspection/task',
+            string_value = inspectiontask.task_definition_arn,
             tier = _ssm.ParameterTier.STANDARD,
         )
 
-        dockername = _ssm.StringParameter(
-            self, 'dockername',
-            description = 'Lunker Zero Fargate Docker',
-            parameter_name = '/fargate/docker',
-            string_value = container.container_name,
+        expansiontaskdef = _ssm.StringParameter(
+            self, 'expansiontaskdef',
+            description = 'Lunker Zero Expansion Task',
+            parameter_name = '/fargate/expansion/task',
+            string_value = expansiontask.task_definition_arn,
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
+        inspectcontainer = _ssm.StringParameter(
+            self, 'inspectcontainer',
+            description = 'Lunker Zero Inspection Container',
+            parameter_name = '/fargate/inspection/container',
+            string_value = inspectioncontainer.container_name,
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
+        expandcontainer = _ssm.StringParameter(
+            self, 'expandcontainer',
+            description = 'Lunker Zero Expansion Container',
+            parameter_name = '/fargate/expansion/container',
+            string_value = expansioncontainer.container_name,
             tier = _ssm.ParameterTier.STANDARD,
         )
