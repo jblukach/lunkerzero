@@ -1,4 +1,4 @@
-### browsertrix-crawler v1.2.5 ###
+### browsertrix-crawler v1.2.6 ###
 
 FROM webrecorder/browsertrix-crawler:latest
 
