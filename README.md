@@ -18,10 +18,6 @@ Slack notifications are received when a monitored DNS, IPv4, or IPv6 is added/re
 
 Censys Search also provides Slack notifications when ports are opened/closed from the Autonomous System (AS) number query results.
 
-Why did I pick **Censys** for the Internet searches?
-
-**FREE** access to the API for the first sixty days so you can determine your organization's value before committing.
-
 https://search.censys.io
 
 Knowing is half the battle, making an excellent capability addition!

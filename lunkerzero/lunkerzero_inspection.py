@@ -36,13 +36,13 @@ class LunkerzeroInspection(Stack):
             removal_policy = RemovalPolicy.DESTROY,
             auto_delete_objects = True,
             enforce_ssl = True,
-            versioned = False
+            versioned = True
         )
 
-        #bucket.add_lifecycle_rule(
-        #    expiration = Duration.days(1),
-        #    noncurrent_version_expiration = Duration.days(1)
-        #)
+        bucket.add_lifecycle_rule(
+            expiration = Duration.days(1),
+            noncurrent_version_expiration = Duration.days(1)
+        )
 
         bucketname = _ssm.StringParameter(
             self, 'bucketname',
@@ -60,13 +60,13 @@ class LunkerzeroInspection(Stack):
             removal_policy = RemovalPolicy.DESTROY,
             auto_delete_objects = True,
             enforce_ssl = True,
-            versioned = False
+            versioned = True
         )
 
-        #download.add_lifecycle_rule(
-        #    expiration = Duration.days(1),
-        #    noncurrent_version_expiration = Duration.days(1)
-        #)
+        download.add_lifecycle_rule(
+            expiration = Duration.days(1),
+            noncurrent_version_expiration = Duration.days(1)
+        )
 
         downloadname = _ssm.StringParameter(
             self, 'downloadname',
