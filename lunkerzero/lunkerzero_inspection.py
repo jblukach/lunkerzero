@@ -5,12 +5,17 @@ from aws_cdk import (
     RemovalPolicy,
     SecretValue,
     Stack,
+    aws_cloudwatch as _cloudwatch,
+    aws_cloudwatch_actions as _actions,
     aws_ec2 as _ec2,
     aws_ecs as _ecs,
     aws_iam as _iam,
+    aws_lambda as _lambda,
     aws_logs as _logs,
     aws_s3 as _s3,
+    aws_s3_notifications as _notifications,
     aws_secretsmanager as _secretsmanager,
+    aws_sns as _sns,
     aws_ssm as _ssm
 )
 
@@ -25,6 +30,20 @@ class LunkerzeroInspection(Stack):
         region = Stack.of(self).region
 
         epoch = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+
+    ### LAYERS ###
+
+        getpublicip = _lambda.LayerVersion.from_layer_version_arn(
+            self, 'getpublicip',
+            layer_version_arn = 'arn:aws:lambda:'+region+':070176467818:layer:getpublicip:12'
+        )
+
+    ### TOPIC ###
+
+        topic = _sns.Topic.from_topic_arn(
+            self, 'topic',
+            topic_arn = 'arn:aws:sns:'+region+':'+account+':lunkerzero'
+        )
 
     ### S3 BUCKET ###
 
@@ -125,14 +144,19 @@ class LunkerzeroInspection(Stack):
 
     ### PARAMETERS ###
 
-        vpcid = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'vpcid',
-            parameter_name = '/network/vpc'
-        )
-
         azid = _ssm.StringParameter.from_string_parameter_attributes(
             self, 'azid',
             parameter_name = '/network/az'
+        )
+
+        rtbid = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'rtbid',
+            parameter_name = '/network/rtb'
+        )
+
+        sgid = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'sgid',
+            parameter_name = '/network/sg'
         )
 
         subid = _ssm.StringParameter.from_string_parameter_attributes(
@@ -140,9 +164,9 @@ class LunkerzeroInspection(Stack):
             parameter_name = '/network/subnet'
         )
 
-        rtbid = _ssm.StringParameter.from_string_parameter_attributes(
-            self, 'rtbid',
-            parameter_name = '/network/rtb'
+        vpcid = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'vpcid',
+            parameter_name = '/network/vpc'
         )
 
     ### VPC NETWORK ###
@@ -307,4 +331,103 @@ class LunkerzeroInspection(Stack):
             parameter_name = '/fargate/expansion/container',
             string_value = expansioncontainer.container_name,
             tier = _ssm.ParameterTier.STANDARD,
+        )
+
+    ### IAM ###
+
+        role = _iam.Role(
+            self, 'role',
+            assumed_by = _iam.ServicePrincipal(
+                'lambda.amazonaws.com'
+            )
+        )
+
+        role.add_managed_policy(
+            _iam.ManagedPolicy.from_aws_managed_policy_name(
+                'service-role/AWSLambdaBasicExecutionRole'
+            )
+        )
+
+        role.add_to_policy(
+            _iam.PolicyStatement(
+                actions = [
+                    's3:GetObject',
+                    's3:PutObject'
+                ],
+                resources = [
+                    bucket.arn_for_objects('*'),
+                    download.arn_for_objects('*')
+                ]
+            )
+        )
+
+        role.add_to_policy(
+            _iam.PolicyStatement(
+                actions = [
+                    'ecs:RunTask',
+                    'iam:PassRole'
+                ],
+                resources = [
+                    '*'
+                ]
+            )
+        )
+
+    ### PROCESS LAMBDA ###
+
+        process = _lambda.Function(
+            self, 'process',
+            function_name = 'process',
+            runtime = _lambda.Runtime.PYTHON_3_12,
+            architecture = _lambda.Architecture.ARM_64,
+            code = _lambda.Code.from_asset('lunker/process'),
+            timeout = Duration.seconds(900),
+            handler = 'process.handler',
+            environment = dict(
+                AWS_ACCOUNT = account,
+                CRAWL_ID = 'eicar.org',
+                S3_DOWNLOAD = download.bucket_name,
+                S3_INSPECT = bucket.bucket_name,
+                CLUSTER_NAME = cluster.cluster_name,
+                TASK_DEFINITION = expansiontask.task_definition_arn,
+                SUBNET_ID = subid.string_value,
+                SECURITY_GROUP = sgid.string_value,
+                CONTAINER_NAME = expansioncontainer.container_name
+            ),
+            memory_size = 256,
+            retry_attempts = 0,
+            role = role,
+            layers = [
+                getpublicip
+            ]
+        )
+
+        processlogs = _logs.LogGroup(
+            self, 'processlogs',
+            log_group_name = '/aws/lambda/'+process.function_name,
+            retention = _logs.RetentionDays.ONE_DAY,
+            removal_policy = RemovalPolicy.DESTROY
+        )
+
+        processalarm = _cloudwatch.Alarm(
+            self, 'processalarm',
+            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+            threshold = 0,
+            evaluation_periods = 1,
+            metric = process.metric_errors(
+                period = Duration.minutes(1)
+            )
+        )
+
+        processalarm.add_alarm_action(
+            _actions.SnsAction(topic)
+        )
+
+        notification = _notifications.LambdaDestination(
+            process
+        )
+
+        download.add_event_notification(
+            _s3.EventType.OBJECT_CREATED,
+            notification
         )
