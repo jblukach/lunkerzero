@@ -20,7 +20,9 @@ Censys Search also provides Slack notifications when ports are opened/closed fro
 
 https://search.censys.io
 
-Knowing is half the battle, making an excellent capability addition!
+Lastly, the Webrecorder project archives websites for inspection using Amazon GuardDuty & Macie for malicious and sensitive content detection.
+
+https://github.com/webrecorder
 
 ## AWS Chatbot for Slack
 
@@ -144,6 +146,16 @@ Knowing is half the battle, making an excellent capability addition!
 
 ```
 {"osint”: “ipv6”}
+```
+
+## Amazon GuardDuty & Macie
+
+### Website Inspection
+
+![Inspect Diagram](images/inspect-diagram.png)
+
+```
+@aws invoke walleye --payload {"inspect”: “https://4n6ir.com”}
 ```
 
 ![Lunker Zero (LZ)](images/lunkerzero.png)

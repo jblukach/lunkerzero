@@ -77,6 +77,8 @@ class LunkerzeroGuineapigs(Stack):
                     'dynamodb:DeleteItem',
                     'dynamodb:PutItem',
                     'dynamodb:Query',
+                    'ecs:RunTask',
+                    'iam:PassRole',
                     's3:GetObject',
                     'ssm:GetParameter'
                 ],
@@ -98,6 +100,31 @@ class LunkerzeroGuineapigs(Stack):
         )
 
     ### PARAMETERS ###
+
+        cluster = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'cluster',
+            parameter_name = '/fargate/cluster'
+        )
+
+        container = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'container',
+            parameter_name = '/fargate/inspection/container'
+        )
+
+        security = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'security',
+            parameter_name = '/network/sg'
+        )
+
+        subnet = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'subnet',
+            parameter_name = '/network/subnet'
+        )
+
+        taskdef = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'taskdef',
+            parameter_name = '/fargate/inspection/task'
+        )
 
         tld = _ssm.StringParameter.from_string_parameter_attributes(
             self, 'tld',
@@ -138,10 +165,15 @@ class LunkerzeroGuineapigs(Stack):
                 handler = 'lunker.handler',
                 environment = dict(
                     AWS_ACCOUNT = account,
+                    CLUSTER_NAME = cluster.string_value,
+                    CONTAINER_NAME = container.string_value,
                     DYNAMODB_TABLE = table.table_name,
                     DYNAMODB_TLDTABLE = tld.string_value,
                     LUNKER_FISH = fish,
-                    LUNKER_LIMIT = '10'
+                    LUNKER_LIMIT = '10',
+                    SECURITY_GROUP = security.string_value,
+                    SUBNET_ID = subnet.string_value,
+                    TASK_DEFINITION = taskdef.string_value
                 ),
                 memory_size = 512,
                 retry_attempts = 0,

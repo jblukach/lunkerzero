@@ -335,6 +335,65 @@ def handler(event, context):
                         table.delete_item(Key={'pk': 'AS#', 'sk': 'AS#IPV'+str(iptype.version)+'#'+cidr})
                         msg['removed'].append(cidr)
 
+            elif key.lower() == 'inspect':
+
+                code = 200
+                msg = {}
+                msg['inspected'] = str(event['inspect'])
+
+                if event['inspect'].lower().startswith('http://'):
+                    site = event['inspect'][7:]
+                if event['inspect'].lower().startswith('https://'):
+                    site = event['inspect'][8:]
+
+                subids = []
+                subids.append(os.environ['SUBNET_ID'])
+    
+                sgids = []
+                sgids.append(os.environ['SECURITY_GROUP'])
+    
+                ecs = boto3.client('ecs')
+    
+                response = ecs.run_task(
+                    cluster=os.environ['CLUSTER_NAME'],
+                    launchType = 'FARGATE',
+                    taskDefinition=os.environ['TASK_DEFINITION'],
+                    overrides={
+                        'containerOverrides': [
+                            {
+                                'name': os.environ['CONTAINER_NAME'],
+                                'environment': [
+                                    {
+                                        'name': 'INSPECT_URL',
+                                        'value': event['inspect']
+                                    },
+                                    {
+                                        'name': 'STORE_PATH',
+                                        'value': '/'+site+'/'
+                                    },
+                                    {
+                                        'name': 'STORE_FILENAME',
+                                        'value': site+'.wacz'
+                                    },
+                                    {
+                                        'name': 'CRAWL_ID',
+                                        'value': site
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    count = 1,
+                    platformVersion='LATEST',
+                    networkConfiguration={
+                        'awsvpcConfiguration': {
+                            'subnets': subids,
+                            'securityGroups': sgids,
+                            'assignPublicIp': 'ENABLED'
+                        }
+                    }
+                )
+
             elif key.lower() == 'list':
 
                 code = 200

@@ -79,6 +79,8 @@ class LunkerzeroProduction(Stack):
                     'dynamodb:DeleteItem',
                     'dynamodb:PutItem',
                     'dynamodb:Query',
+                    'ecs:RunTask',
+                    'iam:PassRole',
                     's3:GetObject',
                     'ssm:GetParameter'
                 ],
@@ -100,6 +102,31 @@ class LunkerzeroProduction(Stack):
         )
 
     ### PARAMETERS ###
+
+        cluster = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'cluster',
+            parameter_name = '/fargate/cluster'
+        )
+
+        container = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'container',
+            parameter_name = '/fargate/inspection/container'
+        )
+
+        security = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'security',
+            parameter_name = '/network/sg'
+        )
+
+        subnet = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'subnet',
+            parameter_name = '/network/subnet'
+        )
+
+        taskdef = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'taskdef',
+            parameter_name = '/fargate/inspection/task'
+        )
 
         tld = _ssm.StringParameter.from_string_parameter_attributes(
             self, 'tld',
@@ -188,10 +215,15 @@ class LunkerzeroProduction(Stack):
                     AWS_ACCOUNT = account,
                     CENSYS_API_ID = '-',
                     CENSYS_API_SECRET = '-',
+                    CLUSTER_NAME = cluster.string_value,
+                    CONTAINER_NAME = container.string_value,
                     DYNAMODB_TABLE = table.table_name,
                     LUNKER_FISH = fish,
                     REGION = region,
-                    S3_BUCKET = 'cloudcruftbucket'
+                    S3_BUCKET = 'cloudcruftbucket',
+                    SECURITY_GROUP = security.string_value,
+                    SUBNET_ID = subnet.string_value,
+                    TASK_DEFINITION = taskdef.string_value
                 ),
                 memory_size = 512,
                 retry_attempts = 0,
