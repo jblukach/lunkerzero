@@ -168,10 +168,15 @@ class LunkerzeroProduction(Stack):
                 handler = 'lunker.handler',
                 environment = dict(
                     AWS_ACCOUNT = account,
+                    CLUSTER_NAME = cluster.string_value,
+                    CONTAINER_NAME = container.string_value,
                     DYNAMODB_TABLE = table.table_name,
                     DYNAMODB_TLDTABLE = tld.string_value,
                     LUNKER_FISH = fish,
-                    LUNKER_LIMIT = '250'
+                    LUNKER_LIMIT = '250',
+                    SECURITY_GROUP = security.string_value,
+                    SUBNET_ID = subnet.string_value,
+                    TASK_DEFINITION = taskdef.string_value
                 ),
                 memory_size = 512,
                 retry_attempts = 0,
@@ -215,15 +220,10 @@ class LunkerzeroProduction(Stack):
                     AWS_ACCOUNT = account,
                     CENSYS_API_ID = '-',
                     CENSYS_API_SECRET = '-',
-                    CLUSTER_NAME = cluster.string_value,
-                    CONTAINER_NAME = container.string_value,
                     DYNAMODB_TABLE = table.table_name,
                     LUNKER_FISH = fish,
                     REGION = region,
-                    S3_BUCKET = 'cloudcruftbucket',
-                    SECURITY_GROUP = security.string_value,
-                    SUBNET_ID = subnet.string_value,
-                    TASK_DEFINITION = taskdef.string_value
+                    S3_BUCKET = 'cloudcruftbucket'
                 ),
                 memory_size = 512,
                 retry_attempts = 0,

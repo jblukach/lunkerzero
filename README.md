@@ -150,12 +150,10 @@ https://github.com/webrecorder
 
 ## Amazon GuardDuty & Macie
 
-### Website Inspection
-
 ![Inspect Diagram](images/inspect-diagram.png)
+
+### Website Inspection
 
 ```
 @aws invoke walleye --payload {"inspect”: “https://4n6ir.com”}
 ```
-
-![Lunker Zero (LZ)](images/lunkerzero.png)

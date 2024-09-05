@@ -105,6 +105,8 @@ class LunkerzeroInspection(Stack):
             statement = _iam.PolicyStatement(
                 effect = _iam.Effect.ALLOW,
                 actions = [
+                    's3:AbortMultipartUpload',
+                    's3:ListMultipartUploadParts',
                     's3:PutObject'
                 ],
                 resources = [
@@ -117,7 +119,8 @@ class LunkerzeroInspection(Stack):
             statement = _iam.PolicyStatement(
                 effect = _iam.Effect.ALLOW,
                 actions = [
-                    's3:GetBucketLocation'
+                    's3:GetBucketLocation',
+                    's3:ListBucketMultipartUploads'
                 ],
                 resources = [
                     download.bucket_arn
@@ -215,15 +218,17 @@ class LunkerzeroInspection(Stack):
 
         inspectiontask = _ecs.TaskDefinition(
             self, 'inspectiontask',
-            cpu = '2048',
-            memory_mib = '4096',
+            cpu = '4096',
+            memory_mib = '8192',
+            ephemeral_storage_gib = 30,
             compatibility = _ecs.Compatibility.FARGATE
         )
 
         expansiontask = _ecs.TaskDefinition(
             self, 'expansiontask',
-            cpu = '2048',
-            memory_mib = '4096',
+            cpu = '4096',
+            memory_mib = '8192',
+            ephemeral_storage_gib = 30,
             compatibility = _ecs.Compatibility.FARGATE
         )
 
