@@ -31,7 +31,7 @@ class LunkerzeroGuineapigs(Stack):
 
         censys = _lambda.LayerVersion.from_layer_version_arn(
             self, 'censys',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:censys:7'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:censys:8'
         )
 
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
