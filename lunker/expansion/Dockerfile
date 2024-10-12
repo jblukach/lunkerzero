@@ -1,4 +1,4 @@
-### 2.160.0 (build 7a8ae02) ###
+### 2.162.1 (build 10aa526) ###
 
 FROM public.ecr.aws/docker/library/python:latest
 
