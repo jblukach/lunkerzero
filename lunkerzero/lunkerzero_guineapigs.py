@@ -134,7 +134,7 @@ class LunkerzeroGuineapigs(Stack):
      ### LUNKER ###
 
         fishes = []
-        fishes.append('perch')
+        #fishes.append('perch')
 
         for fish in fishes:
 
@@ -152,7 +152,7 @@ class LunkerzeroGuineapigs(Stack):
                 billing_mode = _dynamodb.BillingMode.PAY_PER_REQUEST,
                 removal_policy = RemovalPolicy.DESTROY,
                 point_in_time_recovery = True,
-                deletion_protection = True
+                deletion_protection = False
             )
 
             lunker = _lambda.Function(
