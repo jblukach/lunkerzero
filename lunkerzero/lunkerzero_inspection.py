@@ -5,8 +5,6 @@ from aws_cdk import (
     RemovalPolicy,
     SecretValue,
     Stack,
-    aws_cloudwatch as _cloudwatch,
-    aws_cloudwatch_actions as _actions,
     aws_ec2 as _ec2,
     aws_ecs as _ecs,
     aws_iam as _iam,
@@ -15,7 +13,6 @@ from aws_cdk import (
     aws_s3 as _s3,
     aws_s3_notifications as _notifications,
     aws_secretsmanager as _secretsmanager,
-    aws_sns as _sns,
     aws_ssm as _ssm
 )
 
@@ -35,14 +32,7 @@ class LunkerzeroInspection(Stack):
 
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
             self, 'getpublicip',
-            layer_version_arn = 'arn:aws:lambda:'+region+':070176467818:layer:getpublicip:12'
-        )
-
-    ### TOPIC ###
-
-        topic = _sns.Topic.from_topic_arn(
-            self, 'topic',
-            topic_arn = 'arn:aws:sns:'+region+':'+account+':lunkerzero'
+            layer_version_arn = 'arn:aws:lambda:'+region+':070176467818:layer:getpublicip:14'
         )
 
     ### S3 BUCKET ###
@@ -383,7 +373,7 @@ class LunkerzeroInspection(Stack):
         process = _lambda.Function(
             self, 'process',
             function_name = 'process',
-            runtime = _lambda.Runtime.PYTHON_3_12,
+            runtime = _lambda.Runtime.PYTHON_3_13,
             architecture = _lambda.Architecture.ARM_64,
             code = _lambda.Code.from_asset('lunker/process'),
             timeout = Duration.seconds(900),
@@ -412,20 +402,6 @@ class LunkerzeroInspection(Stack):
             log_group_name = '/aws/lambda/'+process.function_name,
             retention = _logs.RetentionDays.ONE_DAY,
             removal_policy = RemovalPolicy.DESTROY
-        )
-
-        processalarm = _cloudwatch.Alarm(
-            self, 'processalarm',
-            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-            threshold = 0,
-            evaluation_periods = 1,
-            metric = process.metric_errors(
-                period = Duration.minutes(1)
-            )
-        )
-
-        processalarm.add_alarm_action(
-            _actions.SnsAction(topic)
         )
 
         notification = _notifications.LambdaDestination(

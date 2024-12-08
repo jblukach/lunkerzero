@@ -2,13 +2,10 @@ from aws_cdk import (
     Duration,
     RemovalPolicy,
     Stack,
-    aws_cloudwatch as _cloudwatch,
-    aws_cloudwatch_actions as _actions,
     aws_dynamodb as _dynamodb,
     aws_iam as _iam,
     aws_lambda as _lambda,
     aws_logs as _logs,
-    aws_sns as _sns,
     aws_ssm as _ssm
 )
 
@@ -31,29 +28,22 @@ class LunkerzeroGuineapigs(Stack):
 
         censys = _lambda.LayerVersion.from_layer_version_arn(
             self, 'censys',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:censys:9'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:censys:13'
         )
 
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
             self, 'getpublicip',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:12'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:14'
         )
 
         netaddr = _lambda.LayerVersion.from_layer_version_arn(
             self, 'netaddr',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:netaddr:7'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:netaddr:8'
         )
 
         requests = _lambda.LayerVersion.from_layer_version_arn(
             self, 'requests',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:requests:5'
-        )
-
-    ### TOPIC ###
-
-        topic = _sns.Topic.from_topic_arn(
-            self, 'topic',
-            topic_arn = 'arn:aws:sns:'+region+':'+account+':lunkerzero'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:requests:7'
         )
 
     ### IAM ###
@@ -158,7 +148,7 @@ class LunkerzeroGuineapigs(Stack):
             lunker = _lambda.Function(
                 self, 'lunker'+fish,
                 function_name = fish,
-                runtime = _lambda.Runtime.PYTHON_3_12,
+                runtime = _lambda.Runtime.PYTHON_3_13,
                 architecture = _lambda.Architecture.ARM_64,
                 code = _lambda.Code.from_asset('lunker/guineapigs'),
                 timeout = Duration.seconds(900),
@@ -191,24 +181,10 @@ class LunkerzeroGuineapigs(Stack):
                 removal_policy = RemovalPolicy.DESTROY
             )
 
-            alarm = _cloudwatch.Alarm(
-                self, 'alarm'+fish,
-                comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-                threshold = 0,
-                evaluation_periods = 1,
-                metric = lunker.metric_errors(
-                    period = Duration.minutes(1)
-                )
-            )
-
-            alarm.add_alarm_action(
-                _actions.SnsAction(topic)
-            )
-
             angler = _lambda.Function(
                 self, 'angler'+fish,
                 function_name = fish+'hook',
-                runtime = _lambda.Runtime.PYTHON_3_12,
+                runtime = _lambda.Runtime.PYTHON_3_13,
                 architecture = _lambda.Architecture.ARM_64,
                 code = _lambda.Code.from_asset('lunker/development'),
                 timeout = Duration.seconds(900),
@@ -237,18 +213,4 @@ class LunkerzeroGuineapigs(Stack):
                 log_group_name = '/aws/lambda/'+angler.function_name,
                 retention = _logs.RetentionDays.ONE_DAY,
                 removal_policy = RemovalPolicy.DESTROY
-            )
-
-            cwa = _cloudwatch.Alarm(
-                self, 'cwa'+fish,
-                comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-                threshold = 0,
-                evaluation_periods = 1,
-                metric = angler.metric_errors(
-                    period = Duration.minutes(1)
-                )
-            )
-
-            cwa.add_alarm_action(
-                _actions.SnsAction(topic)
             )

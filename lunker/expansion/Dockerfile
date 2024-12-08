@@ -1,4 +1,4 @@
-### 2.171.0 (build 4957967) ###
+### 2.172.0 (build 0f666c5) ###
 
 FROM public.ecr.aws/docker/library/python:latest
 

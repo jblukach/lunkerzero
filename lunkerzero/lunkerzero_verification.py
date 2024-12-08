@@ -33,19 +33,12 @@ class LunkerzeroVerification(Stack):
 
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
             self, 'getpublicip',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:12'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:14'
         )
 
         requests = _lambda.LayerVersion.from_layer_version_arn(
             self, 'requests',
-            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:requests:5'
-        )
-
-    ### TOPIC ###
-
-        topic = _sns.Topic.from_topic_arn(
-            self, 'topic',
-            topic_arn = 'arn:aws:sns:'+region+':'+account+':lunkerzero'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:requests:7'
         )
 
     ### DATABASE ###
@@ -110,7 +103,7 @@ class LunkerzeroVerification(Stack):
         tld = _lambda.Function(
             self, 'tld',
             function_name = 'tld',
-            runtime = _lambda.Runtime.PYTHON_3_12,
+            runtime = _lambda.Runtime.PYTHON_3_13,
             architecture = _lambda.Architecture.ARM_64,
             code = _lambda.Code.from_asset('lunker/verification'),
             timeout = Duration.seconds(900),
@@ -133,20 +126,6 @@ class LunkerzeroVerification(Stack):
             log_group_name = '/aws/lambda/'+tld.function_name,
             retention = _logs.RetentionDays.ONE_DAY,
             removal_policy = RemovalPolicy.DESTROY
-        )
-
-        alarm = _cloudwatch.Alarm(
-            self, 'alarm',
-            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-            threshold = 0,
-            evaluation_periods = 1,
-            metric = tld.metric_errors(
-                period = Duration.minutes(1)
-            )
-        )
-
-        alarm.add_alarm_action(
-            _actions.SnsAction(topic)
         )
 
         event = _events.Rule(
